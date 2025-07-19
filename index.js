@@ -3,11 +3,9 @@ const app = express()
 const cors = require('cors')
 const path = require('path')
 
-app.use(express.static(
-    path.join(__dirname, '..', 'reacttut', 'p1', 'project-1', 'dist')
-))
-
 app.use(cors())
+
+app.use(express.static('dist'));
 
 app.use(express.json())
 
@@ -80,12 +78,6 @@ app.delete('/api/notes/:id', (request, response) => {
 
   response.status(204).end()
 })
-
-app.get('*', (req, res) => {
-  res.sendFile(
-    path.join(__dirname, '..', 'reacttut', 'p1', 'project-1', 'dist', 'index.html')
-  );
-});
 
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
