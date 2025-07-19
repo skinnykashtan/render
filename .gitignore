@@ -88,7 +88,6 @@ out
 # public
 
 # vuepress build output
-.vuepress/dist
 
 # vuepress v2.x temp and cache directory
 .temp
@@ -98,7 +97,6 @@ out
 .svelte-kit/
 
 # vitepress build output
-**/.vitepress/dist
 
 # vitepress cache directory
 **/.vitepress/cache
