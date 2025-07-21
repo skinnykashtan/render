@@ -1,9 +1,8 @@
+require('dotenv').config()
+console.log('>>> MONGODB_URI loaded as:', process.env.MONGODB_URI);
 const express = require('express')
 const app = express()
-const cors = require('cors')
-const path = require('path')
-
-app.use(cors())
+const Note = require('./models/note')
 
 app.use(express.static('dist'));
 
@@ -43,15 +42,14 @@ app.post('/api/notes', (request, response) => {
     })
   }
 
-  const note = {
+  const note = new Note({
     content: body.content,
     important: body.important || false,
-    id: generateId()
-  }
+  })
 
-  notes = notes.concat(note)
-
-  response.json(note)
+  note.save().then(savedNote => {
+    response.json(savedNote)
+  })
 })
 
 app.get('/', (request, response) => {
@@ -59,25 +57,43 @@ app.get('/', (request, response) => {
 })
 
 app.get('/api/notes', (request, response) => {
-  response.json(notes)
+  Note.find({}).then(notes => {
+    response.json(notes)
+  })
 })
 
 app.get('/api/notes/:id', (request, response) => {
-  const id = request.params.id
-  const note = notes.find((note) => note.id === id)
-  if (note) {
+  Note.findById(request.params.id).then(note => {
+    if (!note) {
+      return response.status(404).json({ error: 'Notatka nie znaleziona' });
+    }
     response.json(note)
-  } else {
-    response.status(404).end()
-  }
+  }).catch(error => {
+    if (error.name === 'CastError') {
+      return response.status(400).json({ error: 'Bledne id' });
+    }
+
+    console.log(error);
+    response.status(500).json({ error: 'Cos poszlo nie tak...' });
+  })
 })
 
-app.delete('/api/notes/:id', (request, response) => {
-  const id = request.params.id
-  notes = notes.filter(note => note.id !== id)
+app.delete('/api/notes/:id', (req, res) => {
+  Note.findByIdAndDelete(req.params.id)
+    .then(deleted => {
+      if (!deleted) {
+        return res.status(404).json({ error: 'Notatka nie znaleziona' });
+      }
+      res.status(204).end();
+    }).catch(error => {
+    if (error.name === 'CastError') {
+      return response.status(400).json({ error: 'Bledne id' });
+    }
 
-  response.status(204).end()
-})
+    console.log(error);
+    response.status(500).json({ error: 'Cos poszlo nie tak...' });
+  })
+});
 
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
