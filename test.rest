@@ -1,3 +1,13 @@
 GET http://localhost:3001/api/notes/
 
+###
+
+PUT http://localhost:3001/api/notes/688660903eaed5e3ae68daa2
+Content-Type: application/json
+
+{
+  "content": "lkdddd",
+  "important": true
+}
+
 
